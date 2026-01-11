@@ -1,0 +1,37 @@
+name: Hourly Weather Bot
+
+on:
+  schedule:
+    # Cron expression for "At minute 0 past every hour"
+    - cron: '0 * * * *'
+  # Allows manual triggering for testing
+  workflow_dispatch:
+
+jobs:
+  update-weather:
+    runs-on: ubuntu-latest
+    
+    # Permission to write to the repository
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Run Weather Script
+        run: node weather.js
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "Weather-Bot"
+          git config --global user.email "bot@noreply.github.com"
+          git add WEATHER_LOG.md
+          # The command below commits only if there are changes
+          git commit -m "☁️ Hourly weather update [skip ci]" || echo "No changes to commit"
+          git push
